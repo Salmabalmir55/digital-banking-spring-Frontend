@@ -1,16 +1,15 @@
 import { TestBed } from '@angular/core/testing';
 
-import { AppHttpInterceptor } from './app-http.interceptor';
+import { authInterceptor } from './auth.interceptor';
+describe('AuthInterceptor', () => {
+  let service: typeof authInterceptor;
 
-describe('AppHttpInterceptor', () => {
-  beforeEach(() => TestBed.configureTestingModule({
-    providers: [
-      AppHttpInterceptor
-      ]
-  }));
+  beforeEach(() => {
+    TestBed.configureTestingModule({});
+    service = TestBed.inject(authInterceptor);
+  });
 
   it('should be created', () => {
-    const interceptor: AppHttpInterceptor = TestBed.inject(AppHttpInterceptor);
-    expect(interceptor).toBeTruthy();
+    expect(service).toBeTruthy();
   });
 });

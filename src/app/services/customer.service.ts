@@ -1,25 +1,52 @@
 import { Injectable } from '@angular/core';
-import {HttpClient} from "@angular/common/http";
-import {Observable} from "rxjs";
-import {Customer} from "../model/customer.model";
-import {environment} from "../../environments/environment";
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Customer } from '../model/customer.model';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class CustomerService {
-  constructor(private http:HttpClient) { }
+  private baseUrl = 'http://localhost:8080';
 
-  public getCustomers():Observable<Array<Customer>>{
-    return this.http.get<Array<Customer>>(environment.backendHost+"/customers")
+  constructor(private http: HttpClient) {}
+
+  getCustomers(): Observable<Customer[]> {
+    return this.http.get<Customer[]>(`${this.baseUrl}/customers`);
   }
-  public searchCustomers(keyword : string):Observable<Array<Customer>>{
-    return this.http.get<Array<Customer>>(environment.backendHost+"/customers/search?keyword="+keyword)
+
+  searchCustomers(keyword: string): Observable<Customer[]> {
+    return this.http.get<Customer[]>(`${this.baseUrl}/customers/search`, {
+      params: new HttpParams().set('keyword', keyword)
+    });
   }
-  public saveCustomer(customer: Customer):Observable<Customer>{
-    return this.http.post<Customer>(environment.backendHost+"/customers",customer);
+
+  getCustomer(id: number): Observable<Customer> {
+    return this.http.get<Customer>(`${this.baseUrl}/customers/${id}`);
   }
-  public deleteCustomer(id: number){
-    return this.http.delete(environment.backendHost+"/customers/"+id);
+
+  saveCustomer(customer: Customer): Observable<Customer> {
+    return this.http.post<Customer>(`${this.baseUrl}/customers`, customer);
   }
-}
+
+  updateCustomer(customer: Customer): Observable<Customer> {
+    return this.http.put<Customer>(`${this.baseUrl}/customers/${customer.id}`, customer);
+  }
+
+  deleteCustomer(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/customers/${id}`);
+  }
+}import { TestBed } from '@angular/core/testing';
+
+import { DashboardService } from './dashboard.service';
+
+describe('DashboardService', () => {
+  let service: DashboardService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({});
+    service = TestBed.inject(DashboardService);
+  });
+
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
+});

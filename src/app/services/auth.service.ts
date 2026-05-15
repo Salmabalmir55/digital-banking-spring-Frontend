@@ -1,55 +1,91 @@
 import { Injectable } from '@angular/core';
-import {HttpClient, HttpHeaders, HttpParams} from "@angular/common/http";
-import {jwtDecode} from "jwt-decode";
-import {Router} from "@angular/router";
+import { HttpClient } from '@angular/common/http';
+import { Observable, tap } from 'rxjs';
+import jwtDecode from 'jwt-decode';
 
-@Injectable({
-  providedIn: 'root'
-})
+export interface LoginRequest  { username: string; password: string; }
+export interface LoginResponse { accessToken: string; username: string; roles: string; }
+export interface UserProfile   { username: string; roles: string[]; }
+
+@Injectable({ providedIn: 'root' })
 export class AuthService {
+  private baseUrl  = 'http://localhost:8080';
+  private TOKEN_KEY = 'accessToken';
+  private USER_KEY  = 'authUser';
 
-  isAuthenticated: boolean = false;
-  roles: any;
-  username: any;
-  accessToken: any ;
+  constructor(private http: HttpClient) {
+    // On startup, clear any expired token so isLoggedIn() is accurate
+    this.clearIfExpired();
+  }
 
-  constructor(private http: HttpClient , private router : Router) { }
+  login(request: LoginRequest): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.baseUrl}/auth/login`, request).pipe(
+      tap((res) => {
+        localStorage.setItem(this.TOKEN_KEY, res.accessToken);
+        localStorage.setItem(this.USER_KEY, JSON.stringify({
+          username: res.username,
+          roles: this.parseRoles(res.roles)
+        }));
+      })
+    );
+  }
 
-  public login(username : string, password: string) {
-    let options = {
-      headers : new HttpHeaders().set("Content-Type", "application/x-www-form-urlencoded"),
+  logout(): void {
+    localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.USER_KEY);
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem(this.TOKEN_KEY);
+  }
+
+  isLoggedIn(): boolean {
+    const token = this.getToken();
+    if (!token) return false;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.exp * 1000 > Date.now();
+    } catch {
+      this.logout(); // clear corrupt token
+      return false;
     }
-    let params=new HttpParams()
-      .set("username", username)
-      .set("password", password);
-
-    return this.http.post("http://localhost:8085/auth/login",params , options)
   }
 
-  loadProfile(data: any) {
-    this.isAuthenticated = true;
-    this.accessToken = data['access-token'];
-    let decoderJwt:any = jwtDecode(this.accessToken);
-    this.username = decoderJwt.sub;
-    this.roles = decoderJwt.scope;
-    window.localStorage.setItem("jwt-token", this.accessToken);
+  getProfile(): UserProfile | null {
+    const raw = localStorage.getItem(this.USER_KEY);
+    try { return raw ? JSON.parse(raw) : null; }
+    catch { return null; }
   }
 
-  logout() {
-    this.isAuthenticated = false;
-    this.accessToken = undefined;
-    this.username=undefined;
-    this.roles=undefined;
-    window.localStorage.removeItem("access-token");
-    this.router.navigateByUrl('/login');
+  hasRole(role: string): boolean {
+    return this.getProfile()?.roles?.includes(role) ?? false;
   }
 
-  loadJwtTokenFromLocalStorage() {
-    let token = window.localStorage.getItem("jwt-token");
-    if(token){
-      this.loadProfile({"access-token" : token});
-      this.router.navigateByUrl("/admin/customers");
+  private parseRoles(raw: string): string[] {
+    if (!raw) return [];
+    return raw.replace(/[\[\]]/g, '').split(',').map(r => r.trim()).filter(Boolean);
+  }
+
+  private clearIfExpired(): void {
+    const token = this.getToken();
+    if (!token) return;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.exp * 1000 <= Date.now()) this.logout();
+    } catch {
+      this.logout();
+    }
+    loadJwtTokenFromLocalStorage() {
+      const token = this.getToken();
+      if (token) {
+        this.accessToken = token;
+        this.isAuthenticated = true;
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          this.username = payload.sub;
+          this.roles = payload.scope;
+        } catch(e) {}
+      }
     }
   }
 }
-

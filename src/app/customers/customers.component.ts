@@ -14,7 +14,7 @@ import {Router} from "@angular/router";
 export class CustomersComponent implements OnInit {
   customers! : Observable<Array<Customer>>;
   errorMessage!: string;
-  searchFormGroup : FormGroup | undefined;
+  searchFormGroup : FormGroup ;
   constructor(private customerService : CustomerService, private fb : FormBuilder, private router : Router) { }
 
   ngOnInit(): void {

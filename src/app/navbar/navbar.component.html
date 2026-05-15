@@ -1,40 +1,42 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">Navbar</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="#">Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/admin/accounts">Accounts</a>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Customers
-          </a>
-          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li><a class="dropdown-item" routerLink="/admin/customers">Search customers</a></li>
-            <li *ngIf="authService.roles.includes('ADMIN')"><a class="dropdown-item" routerLink="/admin/new-customer">New customer</a></li>
-          </ul>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
-        </li>
-      </ul>
-      <ul class ="navbar" *ngIf="authService.isAuthenticated==true">
-        <li class="nav-item" >
-          <a class="nav-link active">
-            {{ this.authService.username }}
-          </a>
-        </li>
-        <li>
-          <button (click)="handleLogout()" class="btn btn-success">Logout</button>
-        </li>
-      </ul>
+<nav class="navbar">
+  <div class="navbar-brand">
+    <div class="brand-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <rect x="2" y="6" width="20" height="13" rx="2" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M7 6V4a1 1 0 011-1h8a1 1 0 011 1v2" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M12 11v4M10 13h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
     </div>
+    <span class="brand-name">BankOS</span>
+  </div>
+
+  <div class="nav-links">
+    <a routerLink="/dashboard"    routerLinkActive="active" class="nav-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <a routerLink="/customers"    routerLinkActive="active" class="nav-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87"/></svg>
+      Customers
+    </a>
+    <a routerLink="/accounts"     routerLinkActive="active" class="nav-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+      Accounts
+    </a>
+  </div>
+
+  <div class="nav-user">
+    <div class="user-chip">
+      <div class="user-avatar">{{ username.charAt(0).toUpperCase() }}</div>
+      <span class="user-name">{{ username }}</span>
+    </div>
+    <button class="logout-btn" (click)="logout()" title="Sign out">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      Logout
+    </button>
   </div>
 </nav>
